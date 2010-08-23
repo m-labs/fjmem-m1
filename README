@@ -1,0 +1,40 @@
+[> About
+This is a fjmem compatible core for the Milkymist(tm) One board [1]. It
+provides support to program the onboard parallel flash with UrJTAG [2].
+
+[> Requirements
+ - Milkymist One board :)
+ - UrJTAG compatbile JTAG pod
+ - PLD enabled UrJTAG, see [3]
+ - Xilinx ISE (WebPack edition is sufficient)
+
+[> Howto
+Build the flasher with:
+ $ cd boards/milkymist-one/synthesis
+ $ make -f Makefile.xst all
+This will result in a bitstream which is loaded into the FPGA before
+flashing. It provides an interface compatible with the fjmem bus driver of
+UrJTAG.
+
+After building and installing UrJTAG start it by
+ $ jtag
+
+Execute the following commands on the CLI to program the flash
+ cable Turtleizer2 vid=0x0403 pid=0x6010 (this depends on your pod)
+ detect
+ pld load /path/to/system.bit (eg. build/system.bit)
+ initbus fjmem opcode=000010
+ detectflash 0
+ flashmem 0 /path/to/system.bin
+Only binary files are supported by UrJTAG atm.
+
+[> Debugging
+LED1 should blink with approx. 1Hz after loading the bitstream.
+LED2 toggles with a transition to the DR_UPDATE state of the TAP state
+machine.
+
+[> References
+ [1] http://www.milkymist.org
+ [2] http://urjtag.org
+ [3] http://git.serverraum.org/?p=mw/urjtag.git;a=summary
+

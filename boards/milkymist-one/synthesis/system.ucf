@@ -1,0 +1,61 @@
+# ==== Clock input ====
+NET "clk50" LOC = AB11 | IOSTANDARD = LVCMOS33;
+
+NET "clk50" TNM_NET = "GRPclk50";
+TIMESPEC "TSclk50" = PERIOD "GRPclk50" 20 ns HIGH 50%;
+
+# ==== Flash ====
+NET "flash_adr(0)" LOC = L22;
+NET "flash_adr(1)" LOC = L20;
+NET "flash_adr(2)" LOC = K22;
+NET "flash_adr(3)" LOC = K21;
+NET "flash_adr(4)" LOC = J19;
+NET "flash_adr(5)" LOC = H20;
+NET "flash_adr(6)" LOC = F22;
+NET "flash_adr(7)" LOC = F21;
+NET "flash_adr(8)" LOC = K17;
+NET "flash_adr(9)" LOC = J17;
+NET "flash_adr(10)" LOC = E22;
+NET "flash_adr(11)" LOC = E20;
+NET "flash_adr(12)" LOC = H18;
+NET "flash_adr(13)" LOC = H19;
+NET "flash_adr(14)" LOC = F20;
+NET "flash_adr(15)" LOC = G19;
+NET "flash_adr(16)" LOC = C22;
+NET "flash_adr(17)" LOC = C20;
+NET "flash_adr(18)" LOC = D22;
+NET "flash_adr(19)" LOC = D21;
+NET "flash_adr(20)" LOC = F19;
+NET "flash_adr(21)" LOC = F18;
+NET "flash_adr(22)" LOC = D20;
+NET "flash_adr(23)" LOC = D19;
+NET "flash_d(0)" LOC = AA20;
+NET "flash_d(1)" LOC = U14;
+NET "flash_d(2)" LOC = U13;
+NET "flash_d(3)" LOC = AA6;
+NET "flash_d(4)" LOC = AB6;
+NET "flash_d(5)" LOC = W4;
+NET "flash_d(6)" LOC = Y4;
+NET "flash_d(7)" LOC = Y7;
+NET "flash_d(8)" LOC = AA2;
+NET "flash_d(9)" LOC = AB2;
+NET "flash_d(10)" LOC = V15;
+NET "flash_d(11)" LOC = AA18;
+NET "flash_d(12)" LOC = AB18;
+NET "flash_d(13)" LOC = Y13;
+NET "flash_d(14)" LOC = AA12;
+NET "flash_d(15)" LOC = AB12;
+
+NET "flash_adr(*)" IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8;
+NET "flash_d(*)" IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8 | PULLDOWN;
+
+NET "flash_ce_n" LOC = M21 | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8;
+NET "flash_oe_n" LOC = M22 | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8;
+NET "flash_we_n" LOC = N20 | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8;
+NET "flash_rst_n" LOC = P22 | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8;
+NET "flash_sts" LOC = R20 | IOSTANDARD = LVCMOS33 | PULLUP;
+
+# ==== LEDs ====
+NET "led1" LOC = B16 | IOSTANDARD = LVCMOS33 | SLEW = QUIETIO | DRIVE = 24;
+NET "led2" LOC = A16 | IOSTANDARD = LVCMOS33 | SLEW = QUIETIO | DRIVE = 24;
+
