@@ -1,0 +1,132 @@
+#!/bin/sh
+#
+# m1nor - Flash a file to M1 NOR partition selected by the file name
+#
+# Written 2011 by Werner Almesberger
+# Copyright 2011 by Werner Almesberger
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+
+#
+# According to
+# http://www.milkymist.org/wiki/index.php?title=Flashing_the_Milkymist_One#Flash_Memory_Distribution
+#
+# standby.fpg		0x0000 0000	 640k 
+# soc-rescue.fpg	0x000A 0000	1536k
+# bios-rescue.bin	0x0022 0000	 128k
+# splash-rescue.raw	0x0024 0000	 640k
+# flickernoise.fbi(res)	0x002E 0000	4096k
+# soc.fpg		0x006E 0000	1536k	alias: system.fpg
+# bios.bin		0x0086 0000	 128k
+# splash.raw		0x0088 0000	 640k
+# flickernoise.fbi	0x0092 0000	4096k
+# (data)		0x00D2 0000	19328k
+#
+
+classify()
+{
+	if [ ! -r "$1" ]; then
+		echo "$1: cannot read" 1>&2
+		exit 1
+	fi
+
+	b=${1##*/}
+	if [ "${b#standby}" != "$b" ]; then		off=0x0;	ext=.fpg
+	elif [ "${b#soc-rescue}" != "$b" ]; then	off=0xa0000;	ext=.fpg
+	elif [ "${b#bios-rescue}" != "$b" ]; then	off=0x220000;	ext=.bin
+	elif [ "${b#splash-rescue}" != "$b" ]; then	off=0x240000;	ext=.raw
+	elif [ "${b#flickernoise-rescue}" != "$b" ]; then off=0x2e0000;	ext=.fbi
+	elif [ "${b#soc}" != "$b" ]; then		off=0x6e0000;	ext=.fpg
+	elif [ "${b#system}" != "$b" ]; then		off=0x6e0000;	ext=.fpg
+	elif [ "${b#bios}" != "$b" ]; then		off=0x860000;	ext=.bin
+	elif [ "${b#splash}" != "$b" ]; then		off=0x880000;	ext=.raw
+	elif [ "${b#flickernoise}" != "$b" ]; then	off=0x920000;	ext=.fbi
+	elif [ "${b#data}" != "$b" ]; then		off=0xd20000;	ext=
+	else
+		echo "$1: unrecognized file name" 1>&2
+		exit 1
+	fi
+
+	if [ "$ext" -a "${1%$ext}" = "$1" ]; then
+		echo "$1: extension mismatch (expected $ext)" 1>&2
+		exit 1
+	fi
+}
+
+
+if [ -z "$1" ]; then
+	echo "usage: $0 filename ..." 1>&2
+	exit 1
+fi
+
+if [ "$FJMEM_BIT" ]; then
+	fjmem=$FJMEM_BIT
+else
+	fjmem=
+	for n in /usr/local/share/milkymist/fjmem.bit \
+	    $HOME/.qi/milkymist/*/*/fjmem.bit; do
+		if [ -r "$n" ]; then
+			fjmem="$n"
+			break
+		fi
+	done
+	if [ -z "$fjmem" ]; then
+		echo "cannot find fjmem.bit (consider setting FJMEM_BIT)" 1>&2
+		exit 1
+	fi
+fi
+
+for n in "$@"; do
+	classify "$n"
+done
+
+(
+	cat <<EOF
+cable milkymist
+detect
+instruction CFG_OUT  000100 BYPASS
+instruction CFG_IN   000101 BYPASS
+pld load "$fjmem"
+initbus fjmem opcode=000010
+frequency 6000000
+detectflash 0
+endian big
+EOF
+	for n in "$@"; do
+		classify "$n"
+		echo flashmem "$off" "$n" noverify
+	done
+	echo lockflash 0 55
+	echo detectflash 0
+	echo pld reconfigure
+) | jtag -q || exit
+
+#
+# Fun fact: a direct flashmem-lockflash-pld reconfigure sequence leaves
+# the FPGA in a weird state from which it can't boot out of standby, neither
+# via JTAG (pld load ...) or by pressing the middle button.
+#
+# The only thing that seems to help is to run "detectflash" after the locking.
+# (Tried "peek", "usleep", "pld readreg", ... without success.)
+#
+
+#
+# FIXME: the exit code of "jtag" doesn't indicate whether the session was
+# successful.
+#
+
+first=true
+for n in "$@"; do
+	classify "$n"
+	echo -n "Flashed $n at offset $off" 1>&2
+	if $first; then
+		echo " using $fjmem" 1>&2
+	else
+		echo 1>&2
+	fi
+	first=false
+done
