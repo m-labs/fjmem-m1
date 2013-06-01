@@ -4,27 +4,12 @@
 #
 # Written 2011 by Werner Almesberger
 # Copyright 2011 by Werner Almesberger
+# Flash layout changed for milkmyist-ng Sebastien Bourdeauducq 2013
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-#
-
-#
-# According to
-# http://www.milkymist.org/wiki/index.php?title=Flashing_the_Milkymist_One#Flash_Memory_Distribution
-#
-# standby.fpg		0x0000 0000	 640k 
-# soc-rescue.fpg	0x000A 0000	1536k
-# bios-rescue.bin	0x0022 0000	 128k
-# splash-rescue.raw	0x0024 0000	 640k
-# flickernoise.fbi(res)	0x002E 0000	4096k
-# soc.fpg		0x006E 0000	1536k	alias: system.fpg
-# bios.bin		0x0086 0000	 128k
-# splash.raw		0x0088 0000	 640k
-# flickernoise.fbi	0x0092 0000	4096k
-# (data)		0x00D2 0000	19328k
 #
 
 classify()
@@ -35,17 +20,9 @@ classify()
 	fi
 
 	b=${1##*/}
-	if [ "${b#standby}" != "$b" ]; then		off=0x0;	ext=.fpg
-	elif [ "${b#soc-rescue}" != "$b" ]; then	off=0xa0000;	ext=.fpg
-	elif [ "${b#bios-rescue}" != "$b" ]; then	off=0x220000;	ext=.bin
-	elif [ "${b#splash-rescue}" != "$b" ]; then	off=0x240000;	ext=.raw
-	elif [ "${b#flickernoise-rescue}" != "$b" ]; then off=0x2e0000;	ext=.fbi
-	elif [ "${b#soc}" != "$b" ]; then		off=0x6e0000;	ext=.fpg
-	elif [ "${b#system}" != "$b" ]; then		off=0x6e0000;	ext=.fpg
-	elif [ "${b#bios}" != "$b" ]; then		off=0x860000;	ext=.bin
-	elif [ "${b#splash}" != "$b" ]; then		off=0x880000;	ext=.raw
-	elif [ "${b#flickernoise}" != "$b" ]; then	off=0x920000;	ext=.fbi
-	elif [ "${b#data}" != "$b" ]; then		off=0xd20000;	ext=
+	if [ "${b#soc}" != "$b" ]; then			off=0x00000000;	ext=.fpg
+	elif [ "${b#bios}" != "$b" ]; then		off=0x00180000;	ext=.bin
+	elif [ "${b#videomixer}" != "$b" ]; then	off=0x001A0000;	ext=.fbi
 	else
 		echo "$1: unrecognized file name" 1>&2
 		exit 1
