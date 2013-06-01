@@ -45,6 +45,7 @@ classify()
 	elif [ "${b#bios}" != "$b" ]; then		off=0x860000;	ext=.bin
 	elif [ "${b#splash}" != "$b" ]; then		off=0x880000;	ext=.raw
 	elif [ "${b#flickernoise}" != "$b" ]; then	off=0x920000;	ext=.fbi
+	elif [ "${b#videomixer}" != "$b" ]; then	off=0x920000;	ext=.fbi
 	elif [ "${b#data}" != "$b" ]; then		off=0xd20000;	ext=
 	else
 		echo "$1: unrecognized file name" 1>&2
