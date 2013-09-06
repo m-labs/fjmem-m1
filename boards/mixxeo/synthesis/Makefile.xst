@@ -1,0 +1,26 @@
+BOARD_DIR=../rtl
+FJMEM_DIR=../../../fjmem/rtl
+
+SRC = $(wildcard $(BOARD_DIR)/*.v)
+SRC += $(wildcard $(FJMEM_DIR)/*.v)
+SRC += $(wildcard $(FJMEM_DIR)/spartan6/*.v)
+
+all: build/system.bit
+
+build/system.ucf: system.ucf
+	cp system.ucf build/system.ucf
+
+build/system.prj: $(SRC)
+	rm -f build/system.prj
+	for i in `echo $^`; do \
+	    echo "verilog work ../$$i" >> build/system.prj; \
+	done
+
+build/system.ngc: build/system.prj
+	cd build && xst -ifn ../system.xst
+
+build/system.ngd: build/system.ngc build/system.ucf
+	cd build && ngdbuild -uc system.ucf system.ngc
+
+include common.mak
+
