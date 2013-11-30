@@ -75,7 +75,6 @@ EOF
 		classify "$n"
 		echo flashmem "$off" "$n" noverify
 	done
-	echo lockflash 0 55
 	echo detectflash 0
 	echo pld reconfigure
 ) | jtag -q || exit
